@@ -18,7 +18,7 @@ matplotlib.use('MacOSX')
 import seaborn as sns
 import json
 
-
+'''
 def main(filename, filetype):
     #return run(filename, filetype)
 
@@ -26,10 +26,22 @@ def main(filename, filetype):
     chatlog = getChat(filename, filetype)
 
     # create all visualizations
-    # createPlots(chatlog)    # doesn't work with UI yet
+    createPlots(chatlog)    # doesn't work with UI yet
 
     # fetch statistics
     return fetchStatistics(chatlog)
+'''
+
+def main():
+    filename = "message_1.json"
+    filetype = "json"
+    chatlog = getChat(filename, filetype)
+
+    # create all visualizations
+    createPlots(chatlog)    # doesn't work with UI yet
+
+
+
 
 def getChat(filename, filetype):
     '''
@@ -147,9 +159,9 @@ def getResponseTimes(chat):
     '''
     Returns a dataframe of message names and response times over time
     '''
-    responseTimes = dict()
     changed_chat = chat[:]
     changed_chat['time'] = changed_chat['time'].diff()
+    
     return changed_chat
 
 def getNumberOfConversationsStarted(chat):
@@ -293,6 +305,7 @@ def plotResponseTimeOverTime(chat):
     '''
     changed_chat = getResponseTimes(chat)
     changed_chat['time'] = changed_chat['time'].dt.seconds
+    #changed_chat = changed_chat[changed_chat['time'] > pd.to_seconds(43200)]
     users = chat.user.unique()
     sns.set(style="whitegrid")
     for user in users:
@@ -363,3 +376,6 @@ def spawnDF(filename):
     df.index = range(len(df.index))
     print(df)
     return df
+
+if __name__ == '__main__':
+    main()
