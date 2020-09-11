@@ -1,5 +1,9 @@
 client/venv
 client/env
+client/get-pip.py
+client/__pycache__/
 client/instance/scripts/__pycache__/
 .DS_Store
+scripts
+.vscode
 
