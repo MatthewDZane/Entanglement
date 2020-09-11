@@ -1,4 +1,4 @@
-#1/bin/bash
+#!/bin/bash
 # Run using Ubuntu
 # Use to activate application, which will be on http://127.0.0.1:5000
 # assumes you are at top level of repo
