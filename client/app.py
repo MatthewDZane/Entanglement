@@ -37,6 +37,7 @@ def chartsm():
 def get_data():
     dataFile = request.files['file_path']
     dataFileName = dataFile.filename
+
     dataFile.save(os.path.join(uploads_dir, dataFileName))
 
     if "csv" in dataFileName:
@@ -50,7 +51,7 @@ def get_data():
     else:
         which_url ="/charts"
     filePath = 'scripts/' + dataFileName
-    result = main(os.path.join(app.instance_path, filePath), fileType)
+    result = main(os.path.join(app.instance_path, filePath))
 
     numberOfMessages = result[0]
     numberOfResponses = result[1]

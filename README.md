@@ -76,8 +76,17 @@ Visit `localhost:5000` on your browser
 
 Visit `localhost:5000` on your browser
 
+## Create Data Plots of Chats
+| Step 0: Move your chat file into the "Entanglement/client/instance/scripts" Directory
+
+| Step 1: Activate createDataPlots.sh Script with the File Name in Single Quotes
+
+<img src=./client/static/SCRIPT_ACTIVATION.png />
+
+| Step 2: View Data Plots in the "Entanglement/client/instance/scripts/Visualizations" Directory
+
+<img src=./client/static/CHARTS-GOOD.png />
 
 ## Demo Link (Demo Video is also in repo)
 
 https://youtu.be/CyTxb-6txKI
-

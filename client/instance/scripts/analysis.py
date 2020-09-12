@@ -12,59 +12,70 @@ nlp.max_length = 10000000
 from textblob import TextBlob
 import datetime
 from datetime import timedelta
-# import matplotlib.pyplot as plt
-# import matplotlib
-# import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib
+import seaborn as sns
 import json
+import sys
 
-def main(filename, filetype):
+def main(filename):
     #return run(filename, filetype)
 
-     # converts data into pd dataframe
-    chatlog = getChat(filename, filetype)
-
-    # create all visualizations
-    # createPlots(chatlog)    # doesn't work with UI yet
+    # converts data into pd dataframe
+    chatlog = getChat(filename)
 
     # fetch statistics
     return fetchStatistics(chatlog)
 
-
-
-def getChat(filename, filetype):
+def getChat(filename):
     '''
     Takes a filename and a type, where type is either 'json' or 'csv'
     '''
     # fetches data and converts to pd dataframe
 
-    if filetype == 'json':
+    if isJsonFile(filename):
         return spawnDF(filename)
-    elif filetype == 'csv':
+    elif isCsvFile(filename):
         chat = pd.read_csv(filename)
         chat['time'] = pd.to_datetime(chat['time'], infer_datetime_format=True)
         return chat
 
-##def createPlots(chat):
-##    '''
-##    Fetches visualizations of data.
-##    '''
-##    # plots messages per person over time (bar graph)
-##    messages = getNumberOfMessages(chat)
-##    plotMessages(messages)
-##    plt.close()
-##    # plots conversations started per person over time (bar graph)
-##    convosStarted = getNumberOfConversationsStarted(chat)
-##    plotConvosStarted(convosStarted)
-##    plt.close()
-##    # plots words sent per person over time (line graph)
-##    plotWordsOverTime(chat)
-##    plt.close()
-##    # plots response time per person over time (line graph)
-##    plotResponseTimeOverTime(chat)
-##    plt.close()
-##    # plots sentiment per person over time (line graph)
-##    plotSentimentOverTime(chat)
-##    plt.close()
+def isJsonFile(filename):
+    return "json" in filename
+
+def isCsvFile(filename):
+    return "csv" in filename
+
+def createPlots(filename):
+    '''
+    Fetches visualizations of data.
+    '''
+    # converts data into pd dataframe
+    chat = getChat(filename)
+
+    file = None
+    if isJsonFile:
+        file = filename[0:len(filename) - 5]
+    elif isCsvFile:
+        file = filename[0:len(filename) - 4]
+
+    # plots messages per person over time (bar graph)
+    messages = getNumberOfMessages(chat)
+    plotMessages(messages, file)
+    plt.close()
+    # plots conversations started per person over time (bar graph)
+    convosStarted = getNumberOfConversationsStarted(chat)
+    plotConvosStarted(convosStarted, file)
+    plt.close()
+    # plots words sent per person over time (line graph)
+    plotWordsOverTime(chat, file)
+    plt.close()
+    # plots response time per person over time (line graph)
+    plotResponseTimeOverTime(chat, file)
+    plt.close()
+    # plots sentiment per person over time (line graph)
+    plotSentimentOverTime(chat, file)
+    plt.close()
 
 def fetchStatistics(chat):
     '''
@@ -269,71 +280,71 @@ def userKeyWords(chat):
 
 # -------------------------------- Visualizations --------------------------------
 
-# def plotMessages(messages):
-#     names = list(messages.keys())
-#     number = list(messages.values())
-#     df = pd.DataFrame(list(zip(names, number)), columns=['Person', 'Number of Messages'])
-#     sns.set(style="whitegrid")
-#     sns.barplot(x="Person", y="Number of Messages", data=df).set_title("Number of Messages per Person")
-#     plt.savefig("Visualizations/Number of Messages per person.jpeg")
+def plotMessages(messages, filename):
+    names = list(messages.keys())
+    number = list(messages.values())
+    df = pd.DataFrame(list(zip(names, number)), columns=['Person', 'Number of Messages'])
+    sns.set(style="whitegrid")
+    sns.barplot(x="Person", y="Number of Messages", data=df).set_title("Number of Messages per Person")
+    plt.savefig("Visualizations/" + filename + " (Number of Messages per person).jpeg")
 
-# def plotConvosStarted(convoStarted):
-#     names = list(convoStarted.keys())
-#     number = list(convoStarted.values())
-#     df = pd.DataFrame(list(zip(names, number)), columns=['Person', 'Number of Conversations Started'])
-#     sns.set(style="whitegrid")
-#     sns.barplot(x="Person", y="Number of Conversations Started", data=df).set_title("Number of Conversations Started per Person")
-#     plt.savefig("Visualizations/Conversations Started per Person.jpeg")
+def plotConvosStarted(convoStarted, filename):
+    names = list(convoStarted.keys())
+    number = list(convoStarted.values())
+    df = pd.DataFrame(list(zip(names, number)), columns=['Person', 'Number of Conversations Started'])
+    sns.set(style="whitegrid")
+    sns.barplot(x="Person", y="Number of Conversations Started", data=df).set_title("Number of Conversations Started per Person")
+    plt.savefig("Visualizations/" + filename + " (Conversations Started per Person).jpeg")
 
-# def plotResponseTimeOverTime(chat):
-#     '''
-#     Message words over time
-#     '''
-#     changed_chat = getResponseTimes(chat)
-#     changed_chat['time'] = changed_chat['time'].dt.seconds
-#     users = chat.user.unique()
-#     sns.set(style="whitegrid")
-#     for user in users:
-#        user_chat = changed_chat[changed_chat['user'] == user]
-#        plt.plot(user_chat['time'], label=user)
-#     plt.legend(loc='lower left')
-#     plt.xlabel("Time")
-#     plt.ylabel("Response Time (s)")
-#     plt.title("Response Times per Person (over Time)")
-#     plt.savefig("Visualizations/Response Times per Person (over Time).jpeg")
+def plotResponseTimeOverTime(chat, filename):
+    '''
+    Message words over time
+    '''
+    changed_chat = getResponseTimes(chat)
+    changed_chat['time'] = changed_chat['time'].dt.seconds
+    users = chat.user.unique()
+    sns.set(style="whitegrid")
+    for user in users:
+       user_chat = changed_chat[changed_chat['user'] == user]
+       plt.plot(user_chat['time'], label=user)
+    plt.legend(loc='lower left')
+    plt.xlabel("Time")
+    plt.ylabel("Response Time (s)")
+    plt.title("Response Times per Person Over Time")
+    plt.savefig("Visualizations/" + filename + " (Response Times per Person Over Time).jpeg")
 
-# def plotWordsOverTime(chat):
-#     '''
-#     Message words over time
-#     '''
-#     changed_chat = chat[:]
-#     changed_chat['message'] = changed_chat['message'].apply(lambda x: len(x.split()))
-#     users = chat.user.unique()
-#     sns.set(style="whitegrid")
-#     for user in users:
-#        user_chat = changed_chat[changed_chat['user'] == user]
-#        plt.plot(user_chat['message'], label=user)
-#     plt.legend(loc='lower left')
-#     plt.xlabel("Time")
-#     plt.ylabel("Words per Message")
-#     plt.title("Words per Message Over Time")
-#     plt.savefig("Visualizations/Words per Message Over Time.jpeg")
+def plotWordsOverTime(chat, filename):
+    '''
+    Message words over time
+    '''
+    changed_chat = chat[:]
+    changed_chat['message'] = changed_chat['message'].apply(lambda x: len(x.split()))
+    users = chat.user.unique()
+    sns.set(style="whitegrid")
+    for user in users:
+       user_chat = changed_chat[changed_chat['user'] == user]
+       plt.plot(user_chat['message'], label=user)
+    plt.legend(loc='lower left')
+    plt.xlabel("Time")
+    plt.ylabel("Words per Message")
+    plt.title("Words per Message Over Time")
+    plt.savefig("Visualizations/" + filename + " (Words per Message Over Time).jpeg")
 
-# def plotSentimentOverTime(chat):
-#     '''
-#     Sentiment over time
-#     '''
-#     changed_chat = getMessageSentiment(chat)
-#     users = chat.user.unique()
-#     sns.set(style="whitegrid")
-#     for user in users:
-#        user_chat = changed_chat[changed_chat['user'] == user]
-#        plt.plot(user_chat['sentiment'], label=user)
-#     plt.legend(loc='lower left')
-#     plt.xlabel("Time")
-#     plt.ylabel("Sentiment Score (Scale -1 to 1)")
-#     plt.title("Sentiment per Person over Time")
-#     plt.savefig("Visualizations/Sentiment per Person over Time.jpeg")
+def plotSentimentOverTime(chat, filename):
+    '''
+    Sentiment over time
+    '''
+    changed_chat = getMessageSentiment(chat)
+    users = chat.user.unique()
+    sns.set(style="whitegrid")
+    for user in users:
+       user_chat = changed_chat[changed_chat['user'] == user]
+       plt.plot(user_chat['sentiment'], label=user)
+    plt.legend(loc='lower left')
+    plt.xlabel("Time")
+    plt.ylabel("Sentiment Score (Scale -1 to 1)")
+    plt.title("Sentiment per Person over Time")
+    plt.savefig("Visualizations/" + filename + " (Sentiment per Person over Time).jpeg")
 
 # -------------------------------- Converts chatlog to program-readable format --------------------------------
 
@@ -359,15 +370,13 @@ def spawnDF(filename):
     df = pd.DataFrame(data, columns=['user', 'time', 'message'])
     df = df.iloc[::-1]    
     df.index = range(len(df.index))
-    print(df)
+##    print(df)
     return df
 
+def plotData(filename):
+    # create all visualizations
+    createPlots(filename)    # doesn't work with UI yet
+    print("Successfully Created Data Plots!")
 
-
-
-## def main():
-##    chatlog = spawnDF("[Line] Chat with Hinako Terasaki.json")
-##    print(getNumberOfResponses(chatlog))
-##
-## if __name__ == "__main__":
-##    main()
+if __name__ == '__main__':
+    plotData(*sys.argv[1:])
