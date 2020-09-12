@@ -17,7 +17,6 @@ from datetime import timedelta
 # import seaborn as sns
 import json
 
-
 def main(filename, filetype):
     #return run(filename, filetype)
 
@@ -29,6 +28,8 @@ def main(filename, filetype):
 
     # fetch statistics
     return fetchStatistics(chatlog)
+
+
 
 def getChat(filename, filetype):
     '''
@@ -43,27 +44,27 @@ def getChat(filename, filetype):
         chat['time'] = pd.to_datetime(chat['time'], infer_datetime_format=True)
         return chat
 
-def createPlots(chat):
-    '''
-    Fetches visualizations of data.
-    '''
-    # plots messages per person over time (bar graph)
-    messages = getNumberOfMessages(chat)
-    plotMessages(messages)
-    plt.close()
-    # plots conversations started per person over time (bar graph)
-    convosStarted = getNumberOfConversationsStarted(chat)
-    plotConvosStarted(convosStarted)
-    plt.close()
-    # plots words sent per person over time (line graph)
-    plotWordsOverTime(chat)
-    plt.close()
-    # plots response time per person over time (line graph)
-    plotResponseTimeOverTime(chat)
-    plt.close()
-    # plots sentiment per person over time (line graph)
-    plotSentimentOverTime(chat)
-    plt.close()
+##def createPlots(chat):
+##    '''
+##    Fetches visualizations of data.
+##    '''
+##    # plots messages per person over time (bar graph)
+##    messages = getNumberOfMessages(chat)
+##    plotMessages(messages)
+##    plt.close()
+##    # plots conversations started per person over time (bar graph)
+##    convosStarted = getNumberOfConversationsStarted(chat)
+##    plotConvosStarted(convosStarted)
+##    plt.close()
+##    # plots words sent per person over time (line graph)
+##    plotWordsOverTime(chat)
+##    plt.close()
+##    # plots response time per person over time (line graph)
+##    plotResponseTimeOverTime(chat)
+##    plt.close()
+##    # plots sentiment per person over time (line graph)
+##    plotSentimentOverTime(chat)
+##    plt.close()
 
 def fetchStatistics(chat):
     '''
@@ -106,7 +107,7 @@ def getNumberOfResponses(chat):
         user = chat['user'][index]
         if user not in messageCount.keys():
             messageCount[user] = 0
-        if user is not prevUser and prevUser is not None:
+        if user != prevUser and prevUser is not None:
             messageCount[user] += 1
         prevUser = user
     return messageCount
@@ -138,7 +139,6 @@ def getAverageResponseTimes(chat):
     totalResponseTimes = getTotalResponseTimes(chat)
     users = chat.user.unique()
     for user in users:
-        user_chat = changed_chat[changed_chat['user'] == user]  # filters to only show messages sent by user
         responseTimes[user] = totalResponseTimes[user] / numResponses[user]  # sums all response times and divides by total messages sent by user
     return responseTimes
 
@@ -146,10 +146,9 @@ def getResponseTimes(chat):
     '''
     Returns a dataframe of message names and response times over time
     '''
-    responseTimes = dict()
-    changed_chat = chat[:]
-    changed_chat['time'] = changed_chat['time'].diff()
-    return changed_chat
+    responseTimes = chat[:]
+    responseTimes['time'] = responseTimes['time'].diff()
+    return responseTimes
 
 def getNumberOfConversationsStarted(chat):
     '''
@@ -159,7 +158,7 @@ def getNumberOfConversationsStarted(chat):
     new_chat = chat[:]
     conversationsStarted = dict()
     conversationsStarted[new_chat['user'][0]] = 1  # automatically setting very first message's user to 1
-    new_chat = new_chat[new_chat['time'].diff() > pd.to_timedelta('12:00:00.00')]
+    new_chat = new_chat[new_chat['time'].diff() > pd.to_timedelta('2:00:00.00')]
     for index in new_chat.index:
         user = new_chat['user'][index]
         if user not in conversationsStarted.keys():
@@ -342,11 +341,11 @@ def fix_text_encoding(text):
     '''
     Fixes text encoding, see https://stackoverflow.com/questions/50008296/facebook-json-badly-encoded
     '''
-    return text.encode('latin1').decode('utf8')
+    return text.encode('latin1', 'ignore').decode('utf8')
 
 def spawnDF(filename):
     data = []
-    with open(filename, encoding="utf8") as f:
+    with open(filename, encoding="ascii", errors="surrogateescape") as f:
         json_data = json.load(f)
     for message in json_data["messages"]:
         timestamp = datetime.datetime.fromtimestamp(int(message['timestamp_ms']/1000))
@@ -362,3 +361,13 @@ def spawnDF(filename):
     df.index = range(len(df.index))
     print(df)
     return df
+
+
+
+
+## def main():
+##    chatlog = spawnDF("[Line] Chat with Hinako Terasaki.json")
+##    print(getNumberOfResponses(chatlog))
+##
+## if __name__ == "__main__":
+##    main()
